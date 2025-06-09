@@ -1,11 +1,17 @@
 package de.freewarepoint.cr;
 
+import de.freewarepoint.cr.io.FileHandler;
+import de.freewarepoint.cr.io.GameState;
+
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 
 public class Game {
 	
@@ -16,6 +22,8 @@ public class Game {
 	private final Set<Player> moved = EnumSet.noneOf(Player.class);
 	private final Map<Player, PlayerStatus> playerStatus;
 	private int round = 1;
+	public static final Logger LOG =
+			Logger.getLogger(Game.class.getName());
 
 	public Game(int width, int height, Settings settings) {
 		this.field = new Field(width, height);
@@ -43,28 +51,15 @@ public class Game {
 		return round;
 	}
 	
-	public void selectMove(int x, int y) {
-		
-		// no further moves if we have a winner
-		if(getWinner() != Player.NONE) {
-			// XXX This is bad. Change ME!
-			System.err.println("Player '" + player + "' tried invalid move (Player '" + getWinner() + " already won): x: " + x + ", y: " + y);
+	public void selectMove(CellCoordinateTuple coord) {
+
+		if (!isMoveValid(coord)) {   // sai se for inválido
 			return;
 		}
+
+		field.putAtom(player, coord);
 		
-		Player owner = field.getOwnerOfCellAtPosition(x, y);
-	
-		// only allow moves into fields that are either unowned
-		// or belong to the current player
-		if(owner != Player.NONE && owner != player) {
-			// XXX This is bad. Change ME!
-			System.err.println("Player '" + player + "' Tried invalid move: x: " + x + ", y: " + y);
-			return;
-		}
-		
-		field.putAtom(player, x, y);
-		
-		fireOnMove(player, x, y);
+		fireOnMove(player, coord);
 		
 		field.react();
 		
@@ -72,6 +67,28 @@ public class Game {
 		++round;
 		// next player
 		player = player == Player.FIRST ? Player.SECOND : Player.FIRST;
+	}
+
+	private boolean isMoveValid(CellCoordinateTuple coord) {
+		// no further moves if we have a winner
+		if (getWinner() != Player.NONE) {
+			LOG.warning(String.format(
+					"Jogada inválida de %s (vencedor %s) em (%d,%d)",
+					player, getWinner(), coord.x, coord.y));
+			return false;          // ou true, se optar pela lógica inversa
+		}
+
+		Player owner = field.getOwnerOfCellAtPosition(coord);
+
+		// only allow moves into fields that are either unowned
+		// or belong to the current player
+		if (owner != Player.NONE && owner != player) {
+			LOG.fine(String.format(
+					"Jogada inválida de %s em célula do oponente (%d,%d)",
+					player, coord.x, coord.y));
+			return false;
+		}
+		return true;
 	}
 
 	/**
@@ -102,9 +119,24 @@ public class Game {
 		this.listeners.add(l);
 	}
 	
-	private void fireOnMove(Player p, int x, int y) {
+	private void fireOnMove(Player p, CellCoordinateTuple coord) {
 		for(final MoveListener l : listeners) {
-			l.onMove(p, x, y);
+			l.onMove(p, coord);
 		}
 	}
+
+	public void save(Path p) {
+		try { FileHandler.save(p, new GameState(this)); }
+		catch(IOException e){ LOG.severe(e.getMessage()); }
+	}
+
+	public static Game load(Path p, Settings s)
+			throws IOException, ClassNotFoundException {
+		Game g = new Game(6, 5, s);
+		FileHandler.load(p).apply(g);
+		return g;
+	}
+
+	public void setCurrentPlayer(Player p){ this.player = p; }
+	public void setRound(int r){ this.round = r; }
 }

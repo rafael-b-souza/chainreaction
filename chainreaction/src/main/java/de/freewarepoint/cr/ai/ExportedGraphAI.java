@@ -6,12 +6,7 @@ import java.util.List;
 
 import javax.swing.JOptionPane;
 
-import de.freewarepoint.cr.CellCoordinateTuple;
-import de.freewarepoint.cr.EvalField;
-import de.freewarepoint.cr.Field;
-import de.freewarepoint.cr.Game;
-import de.freewarepoint.cr.Player;
-import de.freewarepoint.cr.UtilMethods;
+import de.freewarepoint.cr.*;
 
 /**
  * An AI that is used in the process of exporting a jABC KI Graph into a standalone AI jar. This AI is used to interact
@@ -50,10 +45,10 @@ public abstract class ExportedGraphAI implements AI {
 		
 		Exception exception = null;
 		for (int i = 0; i < width*height; i++) {
-			fieldcopy = UtilMethods.getCopyOfField(field);
+			fieldcopy = FieldCopier.getCopyOfField(field);
 			int x = i%width;
 			int y = i/width;
-			if (UtilMethods.isPlacementPossible(fieldcopy, x, y, player)) {
+			if (PlacementValidator.isPlacementPossible(fieldcopy, player, new CellCoordinateTuple(x, y) )) {
 
 				String result = "";
 				try {
@@ -88,7 +83,7 @@ public abstract class ExportedGraphAI implements AI {
 		}
 		chooseBestCell();
 		
-		game.selectMove(bestXCoord, bestYCoord);
+		game.selectMove(new CellCoordinateTuple(bestXCoord, bestYCoord));
 	}
 	
 	private void showErrorMessage(Exception e) {

@@ -30,9 +30,10 @@ public class Field {
 		Field copy = new Field(getWidth(), getHeight());
 		for (int x = 0; x < getWidth(); ++x) {
 			for (int y = 0; y < getHeight(); ++y) {
-				Cell orginalCell = getCellAtPosition(x, y);
+				CellCoordinateTuple coord = new CellCoordinateTuple( x ,y);
+				Cell orginalCell = getCellAtPosition(coord);
 				Cell newCell = new Cell(orginalCell.getNumberOfAtoms(), orginalCell.getOwningPlayer());
-				copy.setCellAtPosition(newCell, x, y);
+				copy.setCellAtPosition(newCell, coord);
 			}
 		}
 		return copy;
@@ -46,22 +47,22 @@ public class Field {
 		return height;
 	}
 
-	private Cell getCellAtPosition(int x, int y) {
-		List<Cell> row = rows.get(y);
-		return row.get(x);
+	private Cell getCellAtPosition(CellCoordinateTuple coord) {
+		List<Cell> row = rows.get(coord.y);
+		return row.get(coord.x);
 	}
 
-	private void setCellAtPosition(Cell cell, int x, int y) {
-		List<Cell> row = rows.get(y);
-		row.set(x, cell);
+	private void setCellAtPosition(Cell cell, CellCoordinateTuple coord) {
+		List<Cell> row = rows.get(coord.y);
+		row.set(coord.x, cell);
 	}
 
-	public byte getNumerOfAtomsAtPosition(int x, int y) {
-		return getCellAtPosition(x, y).getNumberOfAtoms();
+	public byte getNumerOfAtomsAtPosition(CellCoordinateTuple coord) {
+		return getCellAtPosition(coord).getNumberOfAtoms();
 	}
 
-	public Player getOwnerOfCellAtPosition(int x, int y) {
-		return getCellAtPosition(x, y).getOwningPlayer();
+	public Player getOwnerOfCellAtPosition(CellCoordinateTuple coord) {
+		return getCellAtPosition(coord).getOwningPlayer();
 	}
 
 	public int getTotalNumberOfAtomsForPlayer(Player player) {
@@ -69,8 +70,9 @@ public class Field {
 
 		for (int x = 0; x < getWidth(); ++x) {
 			for (int y = 0; y < getHeight(); ++y) {
-				if (getOwnerOfCellAtPosition(x, y) == player) {
-					count += getNumerOfAtomsAtPosition(x, y);
+				CellCoordinateTuple coord = new CellCoordinateTuple( x ,y);
+				if (getOwnerOfCellAtPosition(coord) == player) {
+					count += getNumerOfAtomsAtPosition(coord);
 				}
 			}
 		}
@@ -82,7 +84,8 @@ public class Field {
 		int count = 0;
 		for (int x = 0; x < getWidth(); ++x) {
 			for (int y = 0; y < getHeight(); ++y) {
-				if (getOwnerOfCellAtPosition(x, y) == player) {
+				CellCoordinateTuple coord = new CellCoordinateTuple( x ,y);
+				if (getOwnerOfCellAtPosition(coord) == player) {
 					++count;
 				}
 			}
@@ -93,67 +96,57 @@ public class Field {
 	
 	/**
 	 * Increases the atom count of the cell identified by the x and y coordinates by one --
-	 * if the maximum size of cell hasn't been reached -- and alters the owner of the cell 
+	 * if the maximum size of cell hasn't been reached -- and alters the owner of the cell
 	 * to the given {@link Player}, if necessary.
-	 * 
-	 * @param player
-	 * 		the player who puts the atom
-	 * @param x
-	 * 		the horizontal position
-	 * @param y
-	 *      the vertical position
+	 *
+	 * @param player the player who puts the atom
+	 * @param coord
 	 */
-	public void putAtom(Player player, int x, int y) {
-		if(getNumerOfAtomsAtPosition(x, y) > 0 && !getOwnerOfCellAtPosition(x, y).equals(player)) {
+	public void putAtom(Player player, CellCoordinateTuple coord) {
+		if(getNumerOfAtomsAtPosition(coord) > 0 && !getOwnerOfCellAtPosition(coord).equals(player)) {
 			throw new IllegalStateException("Not allowed to put an atom on a non empty field that is not yours");
 		}
-		setOwningPlayer(player, x, y);
-		final boolean increased = putAtomInternal(x, y);
+		setOwningPlayer(player, coord);
+		final boolean increased = putAtomInternal(coord);
 		if(increased) {
-			fireOnAtomAdded(player, x, y);
+			fireOnAtomAdded(player, coord);
 		}
 	}
 
 	/**
-	 * Increases the atom count of the cell identified by the x and y coordinates by one. 
+	 * Increases the atom count of the cell identified by the x and y coordinates by one.
 	 *
-	 * @param x
-	 * 	X coordinate of the cell
-	 * @param y
-	 * 	Y coordinate of the cell
-	 * @return
-	 * 		whether the number of atoms has been increased, or the maximal size of a cell has been reached.
+	 * @param coord@return whether the number of atoms has been increased, or the maximal size of a cell has been reached.
 	 */
-	private boolean putAtomInternal(int x, int y) {
-		final Cell cell = getCellAtPosition(x, y);
+	private boolean putAtomInternal(CellCoordinateTuple coord) {
+		final Cell cell = getCellAtPosition(coord);
 		return cell.increaseNumberOfAtoms();
 	}
 	
 	
-	private void clearCellAtPosition(int x, int y) {
-		final Cell cell = getCellAtPosition(x, y);
+	public void clearCellAtPosition(CellCoordinateTuple coord) {
+		final Cell cell = getCellAtPosition(coord);
 		cell.clearAtoms();
-		fireOnCellCleared(x, y);
-		setOwningPlayer(Player.NONE, x, y);
+		fireOnCellCleared(coord);
+		setOwningPlayer(Player.NONE, coord);
 	}
 	
 	/**
 	 * Alters the owner to the given {@link Player}, if necessary.
-	 * 
-	 * @param x
-	 * 	X coordinate of the cell
-	 * @param y
-	 * 	Y coordinate of the cell
+	 *
+	 * @param coord
 	 */
-	private void setOwningPlayer(Player player, int x, int y) {
-		final Cell cell = getCellAtPosition(x, y);
+	private void setOwningPlayer(Player player, CellCoordinateTuple coord) {
+		final Cell cell = getCellAtPosition(coord);
 		if(!cell.getOwningPlayer().equals(player)) {
 			cell.setOwningPlayer(player);
-			fireOnOwnerChange(player, x, y);
+			fireOnOwnerChange(player, coord);
 		}
 	}
 
-	byte getCapacityOfCellAtPosition(int x, int y) {
+	byte getCapacityOfCellAtPosition(CellCoordinateTuple coord) {
+		int x = coord.x;
+		int y = coord.y;
 		byte capacity = 3;
 
 		boolean firstColumn = (x == 0);
@@ -173,41 +166,43 @@ public class Field {
 		return capacity;
 	}
 
-	public boolean isCritical(int x, int y) {
-		return getNumerOfAtomsAtPosition(x, y) == getCapacityOfCellAtPosition(x, y);
+	public boolean isCritical(CellCoordinateTuple coord) {
+		return getNumerOfAtomsAtPosition(coord) == getCapacityOfCellAtPosition(coord);
 	}
 
-	private void spreadAtoms(int x, int y) {
-		final Player player = getOwnerOfCellAtPosition(x, y);
+	private void spreadAtoms(CellCoordinateTuple coord) {
+		int x = coord.x;
+		int y = coord.y;
+		final Player player = getOwnerOfCellAtPosition(coord);
 		final List<Move> moves = new LinkedList<>();
 		// move left
 		if (x > 0) {
-			moveAtom(player, x, y, x - 1, y, moves);
+			moveAtom(player, moves, coord, new CellCoordinateTuple(coord.x -1, coord.y) );
 		}
 		// move right
 		if (x < getWidth() - 1) {
-			moveAtom(player, x, y, x + 1, y, moves);
+			moveAtom(player, moves, coord, new CellCoordinateTuple(coord.x +1, coord.y));
 		}
 		// move up
 		if (y > 0) {
-			moveAtom(player, x, y, x, y - 1, moves);
+			moveAtom(player, moves, coord, new CellCoordinateTuple(coord.x, coord.y -1));
 		}
 		// move down
 		if (y < getHeight() - 1) {
-			moveAtom(player, x, y, x, y + 1, moves);
+			moveAtom(player, moves, coord, new CellCoordinateTuple(coord.x, coord.y + 1));
 		}
 		fireOnAtomsMoved(moves);
 		// clear cell
-		clearCellAtPosition(x, y);
+		clearCellAtPosition(coord);
 		
 	}
 
-	private void moveAtom(Player player, int x1, int y1, int x2, int y2, List<Move> moves) {
-		setOwningPlayer(player, x2, y2);
+	private void moveAtom(Player player, List<Move> moves, CellCoordinateTuple coord1, CellCoordinateTuple coord2) {
+		setOwningPlayer(player, coord2);
 
-		if (putAtomInternal(x2, y2)) {
+		if (putAtomInternal(coord2)) {
 			// move
-			moves.add(new Move(x1, y1, x2, y2));
+			moves.add(new Move(coord1, coord2));
 		}
 	}
 
@@ -218,10 +213,11 @@ public class Field {
 			stable = true;
 			for (int x = 0; x < getWidth(); ++x) {
 				for (int y = 0; y < getHeight(); ++y) {
-					byte count = getNumerOfAtomsAtPosition(x, y);
-					if (count > getCapacityOfCellAtPosition(x, y)) {
+					CellCoordinateTuple coord = new CellCoordinateTuple(x, y);
+					byte count = getNumerOfAtomsAtPosition(coord);
+					if (count > getCapacityOfCellAtPosition(coord)) {
 						stable = false;
-						spreadAtoms(x, y);
+						spreadAtoms(coord);
 					}
 				}
 			}
@@ -232,9 +228,9 @@ public class Field {
 		this.listeners.add(l);
 	}
 	
-	private void fireOnAtomAdded(Player player, int x, int y) {
+	private void fireOnAtomAdded(Player player, CellCoordinateTuple coord) {
 		for(final FieldListener l : listeners) {
-			l.onAtomAdded(player, x, y);
+			l.onAtomAdded(player, coord);
 		}
 	}
 	
@@ -244,15 +240,15 @@ public class Field {
 		}
 	}
 	
-	private void fireOnCellCleared(int x, int y) {
+	private void fireOnCellCleared(CellCoordinateTuple coord) {
 		for(final FieldListener l : listeners) {
-			l.onCellCleared(x, y);
+			l.onCellCleared(coord);
 		}
 	}
 	
-	private void fireOnOwnerChange(Player player, int x, int y) {
+	private void fireOnOwnerChange(Player player, CellCoordinateTuple coord) {
 		for(final FieldListener l : listeners) {
-			l.onOwnerChanged(player, x, y);
+			l.onOwnerChanged(player, coord);
 		}
 	}
 }

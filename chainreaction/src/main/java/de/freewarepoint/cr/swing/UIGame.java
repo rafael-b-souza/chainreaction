@@ -10,22 +10,23 @@ import java.awt.KeyEventDispatcher;
 import java.awt.KeyboardFocusManager;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowEvent;
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.swing.BorderFactory;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
-import javax.swing.WindowConstants;
+import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
-import de.freewarepoint.cr.Game;
-import de.freewarepoint.cr.Player;
-import de.freewarepoint.cr.Settings;
-import de.freewarepoint.cr.SettingsLoader;
+import de.freewarepoint.cr.*;
 import de.freewarepoint.cr.ai.AI;
+import de.freewarepoint.cr.io.FileHandler;
+import de.freewarepoint.cr.io.GameState;
+
+import static de.freewarepoint.cr.Game.LOG;
+
 
 /**
  * @author maik
@@ -210,7 +211,7 @@ public class UIGame extends JFrame {
 		}
 	}
 
-	public void selectMove(final int x, final int y) {
+	public void selectMove(final CellCoordinateTuple coord) {
 		if (blockMoves) {
 			return;
 		}
@@ -225,7 +226,7 @@ public class UIGame extends JFrame {
 					return;
 				}
 				
-				game.selectMove(x, y);
+				game.selectMove(coord);
 				updateStatus();
 
 				doAI();
@@ -273,4 +274,66 @@ public class UIGame extends JFrame {
 			}
 		});
 	}
+
+	void saveGameDialog() {
+		JFileChooser fc = new JFileChooser();
+		fc.setDialogTitle("Save Chain-Reaction game");
+		fc.setFileFilter(new FileNameExtensionFilter("Chain Reaction save (*.crsave)",
+				"crsave"));      // filtro
+		if (fc.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
+			Path p = fc.getSelectedFile().toPath();
+			/* acrescenta extensão se o usuário não digitou */
+			if (!p.toString().toLowerCase().endsWith(".crsave")) {
+				p = p.resolveSibling(p.getFileName() + ".crsave");
+			}
+			try {
+				FileHandler.save(p, new GameState(game));
+			} catch (IOException ex) {
+				JOptionPane.showMessageDialog(this,
+						"Erro ao salvar:\n" + ex.getMessage(),
+						"Falha", JOptionPane.ERROR_MESSAGE);
+			}
+		}
+	}
+
+
+	void loadGameDialog() {
+		JFileChooser fc = new JFileChooser();
+		fc.setDialogTitle("Load Chain-Reaction game");
+		fc.setFileFilter(new FileNameExtensionFilter(
+				"Chain Reaction save (*.crsave)", "crsave"));
+
+		if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+			Path p = fc.getSelectedFile().toPath();
+			try {
+				Game loaded = Game.load(p, settings);
+				this.game = loaded;
+
+				uistatus.setGame(game);
+				uiplayerstatus.setGame(game);
+				uisettings.setGame(game);
+
+				rebuildUIField();
+				updateStatus();
+			} catch (Exception ex) {
+				JOptionPane.showMessageDialog(this,
+						"Não foi possível carregar:\n" + ex.getMessage(),
+						"Erro", JOptionPane.ERROR_MESSAGE);
+			}
+		}
+	}
+
+	private void rebuildUIField() {
+		getContentPane().remove(uifield);
+
+		uifield = new UIField(this);
+		uifield.setGame(game);
+
+		getContentPane().add(uifield, BorderLayout.CENTER);
+		revalidate();
+		repaint();
+	}
+
+
+
 }

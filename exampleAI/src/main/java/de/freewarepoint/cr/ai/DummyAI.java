@@ -1,5 +1,6 @@
 package de.freewarepoint.cr.ai;
 
+import de.freewarepoint.cr.CellCoordinateTuple;
 import de.freewarepoint.cr.Field;
 import de.freewarepoint.cr.Game;
 import de.freewarepoint.cr.Player;
@@ -13,7 +14,7 @@ public class DummyAI implements AI {
 	@Override
 	public void doMove() {
 		int[] coords = findNextCoordinates();
-		game.selectMove(coords[0], coords[1]);
+		game.selectMove(new CellCoordinateTuple(coords[0], coords[1]));
 	}
 
 	private int[] findNextCoordinates() {
@@ -25,7 +26,7 @@ public class DummyAI implements AI {
 		while (counter > 0) {
 			int randomX = random.nextInt(field.getWidth());
 			int randomY = random.nextInt(field.getHeight());
-			Player currentOwner = field.getOwnerOfCellAtPosition(randomX, randomY);
+			Player currentOwner = field.getOwnerOfCellAtPosition(new CellCoordinateTuple(randomX, randomY));
 
 			if (currentOwner == game.getCurrentPlayer() || currentOwner == Player.NONE) {
 				int[] coords = new int[2];

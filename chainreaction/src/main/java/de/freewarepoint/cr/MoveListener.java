@@ -7,6 +7,6 @@ package de.freewarepoint.cr;
  */
 public interface MoveListener {
 	
-	public void onMove(Player player, int x, int y);
+	public void onMove(Player player, CellCoordinateTuple coord);
 	
 }

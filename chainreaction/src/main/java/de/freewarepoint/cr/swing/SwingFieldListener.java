@@ -1,9 +1,6 @@
 package de.freewarepoint.cr.swing;
 
-import de.freewarepoint.cr.FieldListener;
-import de.freewarepoint.cr.Move;
-import de.freewarepoint.cr.Player;
-import de.freewarepoint.cr.Settings;
+import de.freewarepoint.cr.*;
 
 import javax.swing.*;
 import java.util.List;
@@ -33,11 +30,11 @@ public class SwingFieldListener implements FieldListener {
 	}
 
 	@Override
-	public void onAtomAdded(final Player player, final int x, final int y) {
+	public void onAtomAdded(final Player player, final CellCoordinateTuple coord) {
 		executeDelayed(new Runnable() {
 			@Override
 			public void run() {
-				listener.onAtomAdded(player, x, y);
+				listener.onAtomAdded(player, coord);
 			}
 
 		}, delay);
@@ -54,21 +51,21 @@ public class SwingFieldListener implements FieldListener {
 	}
 
 	@Override
-	public void onOwnerChanged(final Player player, final int x, final int y) {
+	public void onOwnerChanged(final Player player, final CellCoordinateTuple coord) {
 		executeDelayed(new Runnable() {
 			@Override
 			public void run() {
-				listener.onOwnerChanged(player, x, y);
+				listener.onOwnerChanged(player, coord);
 			}
 		}, 0);
 	}
 
 	@Override
-	public void onCellCleared(final int x, final int y) {
+	public void onCellCleared(final CellCoordinateTuple coord) {
 		executeDelayed(new Runnable() {
 			@Override
 			public void run() {
-				listener.onCellCleared(x, y);
+				listener.onCellCleared(coord);
 			}
 		}, delay);
 	}

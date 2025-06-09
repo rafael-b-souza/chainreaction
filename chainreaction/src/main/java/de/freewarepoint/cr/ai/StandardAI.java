@@ -1,9 +1,6 @@
 package de.freewarepoint.cr.ai;
 
-import de.freewarepoint.cr.Field;
-import de.freewarepoint.cr.Game;
-import de.freewarepoint.cr.Player;
-import de.freewarepoint.cr.UtilMethods;
+import de.freewarepoint.cr.*;
 
 import java.util.Random;
 
@@ -18,12 +15,12 @@ public class StandardAI implements AI {
 
 	private int[] think(Field f, Player playerAI, Player playerOpposing) {
 		Random r = new Random();
-		int opposingAtoms = util.countOwnedAtoms(f, playerOpposing);
+		int opposingAtoms = FieldAnalyzer.countOwnedAtoms(f, playerOpposing);
 		int score = Integer.MIN_VALUE;
 		int[] coords = new int[2];
 		for(int x = 0; x < f.getWidth(); ++x) {
 			for(int y = 0; y < f.getHeight(); ++y) {
-				int cellvalue = calculateCellValue(f, x, y, playerAI, playerOpposing, opposingAtoms);
+				int cellvalue = calculateCellValue(f, playerAI, playerOpposing, opposingAtoms, new CellCoordinateTuple(x, y));
 				if(cellvalue > score || (r.nextBoolean() && cellvalue >= score)) {
 					score = cellvalue;
 					coords[0] = x;
@@ -34,19 +31,19 @@ public class StandardAI implements AI {
 		return coords;
 	}
 	
-	private int calculateCellValue(Field f, int x, int y, Player playerAI, Player playerOpposing, int opposingAtoms) {
-		Player owner = f.getOwnerOfCellAtPosition(x, y);
+	private int calculateCellValue(Field f, Player playerAI, Player playerOpposing, int opposingAtoms, CellCoordinateTuple coord) {
+		Player owner = f.getOwnerOfCellAtPosition(coord);
 		if(owner == Player.NONE || owner == playerAI) {
-			Field fieldAI = util.getCopyOfField(f);
-			util.placeAtom(fieldAI, x, y, playerAI);
-			util.reactField(fieldAI);
-			int tmp = util.countPlayerCells(fieldAI, playerAI);
-			tmp += util.countOwnedAtoms(fieldAI, playerAI);
-			tmp += opposingAtoms - util.countOwnedAtoms(fieldAI, playerOpposing);
-			tmp += util.isCornerCell(fieldAI, x, y) ? 1 : 0;
-			tmp += util.countCriticalFieldsForPlayer(fieldAI, playerAI) * 2;
-			tmp -= util.computeDangerForCell(fieldAI, x, y, playerAI) * 4;
-			tmp -= util.countEndangeredFields(fieldAI, playerAI);
+			Field fieldAI = FieldCopier.getCopyOfField(f);
+			FieldActions.placeAtom(fieldAI, playerAI, coord);
+			FieldActions.reactField(fieldAI);
+			int tmp = FieldAnalyzer.countPlayerCells(fieldAI, playerAI);
+			tmp += FieldAnalyzer.countOwnedAtoms(fieldAI, playerAI);
+			tmp += opposingAtoms - FieldAnalyzer.countOwnedAtoms(fieldAI, playerOpposing);
+			tmp += FieldAnalyzer.isCornerCell(fieldAI, coord) ? 1 : 0;
+			tmp += FieldAnalyzer.countCriticalFieldsForPlayer(fieldAI, playerAI) * 2;
+			tmp -= PlacementValidator.computeDangerForCell(fieldAI, playerAI, coord) * 4;
+			tmp -= FieldAnalyzer.countEndangeredFields(fieldAI, playerAI);
 			return (tmp < 0 ? 0 : tmp);
 		}
 		return -1;
@@ -58,7 +55,7 @@ public class StandardAI implements AI {
 		Player playerOpposing = playerAI == Player.SECOND ? Player.FIRST : Player.SECOND;
 		
 		int[] coords = think(field, playerAI, playerOpposing);
-		game.selectMove(coords[0], coords[1]);
+		game.selectMove(new CellCoordinateTuple(coords[0], coords[1]));
 	}
 
 	@Override

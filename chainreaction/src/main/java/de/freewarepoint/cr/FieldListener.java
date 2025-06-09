@@ -14,14 +14,10 @@ public interface FieldListener {
 	/**
 	 * An atom has been added.
 	 *
-	 * @param player
-	 * 		the player who added the atom.
-	 * @param x
-	 * 		the horizontal coordinate of the cell the atom has been placed.
-	 * @param y
-	 * 		the vertical coordinate of the cell the atom has been placed.
+	 * @param player the player who added the atom.
+	 * @param coord
 	 */
-	public void onAtomAdded(Player player, int x, int y);
+	public void onAtomAdded(Player player, CellCoordinateTuple coord);
 	
 	/**
 	 * A list of atom moves occured.
@@ -32,24 +28,17 @@ public interface FieldListener {
 	public void onAtomsMoved(List<Move> moves);
 	
 	/**
-	 * The owner of a field has changed.
-	 *
-	 * @param player
-	 * 		the new player.
-	 * @param x
-	 * 		the horizontal coordinate of the cell.
-	 * @param y
-	 * 		the vertical coordinate of the cell that has been cleared.
-	 */
-	public void onOwnerChanged(Player player, int x, int y);
+     * The owner of a field has changed.
+     *
+     * @param player the new player.
+     * @param coord
+     */
+	public void onOwnerChanged(Player player, CellCoordinateTuple coord);
 	
 	/**
 	 * A cell has been cleared.
-	 * 
-	 * @param x
-	 * 		the horizontal coordinate of the cell that has been cleared.
-	 * @param y
-	 * 		the vertical coordinate of the cell that has been cleared.
+	 *
+	 * @param coord
 	 */
-	public void onCellCleared(int x, int y);
+	public void onCellCleared(CellCoordinateTuple coord);
 }

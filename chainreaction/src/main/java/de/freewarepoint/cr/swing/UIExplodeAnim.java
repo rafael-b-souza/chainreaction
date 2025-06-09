@@ -164,7 +164,10 @@ public class UIExplodeAnim implements UIAnimation {
 			animCounter += countOfAnims;
 		}
 		double oldDist = dist;
-		dist = (VELOCITY_START * animCounter) + (ACCELERATION/2)*Math.pow(animCounter, 2);
+		double t = animCounter / 25.0;           // normaliza 0-1
+		double easeOut = 1 - Math.pow(1-t, 3);   // cubic-out
+		dist = easeOut * 2 * CELL_SIZE;
+
 		if(dist < oldDist) {
 			dist = oldDist;
 		}

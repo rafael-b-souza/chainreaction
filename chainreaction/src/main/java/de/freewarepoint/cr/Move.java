@@ -6,29 +6,33 @@ package de.freewarepoint.cr;
  *
  */
 public class Move {
-	private final int x1, y1, x2, y2;
+	private final CellCoordinateTuple coord1, coord2;
 
-	public Move(int x1, int y1, int x2, int y2) {
+	public Move(CellCoordinateTuple coord1, CellCoordinateTuple coord2) {
 		super();
-		this.x1 = x1;
-		this.y1 = y1;
-		this.x2 = x2;
-		this.y2 = y2;
+		this.coord1 = coord1;
+		this.coord2 = coord2;
 	}
 	
 	public int getX1() {
-		return x1;
+		return coord1.x;
 	}
 	
 	public int getY1() {
-		return y1;
+		return coord1.y;
 	}
 
 	public int getX2() {
-		return x2;
+		return coord2.x;
 	}
 	
 	public int getY2() {
-		return y2;
+		return coord2.y;
+	}
+
+	public CellCoordinateTuple getCoord1(){return coord1;}
+
+	public CellCoordinateTuple getCoord2() {
+		return coord2;
 	}
 }
