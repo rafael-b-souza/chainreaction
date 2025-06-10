@@ -1,5 +1,6 @@
 package de.freewarepoint.cr.swing;
 
+import de.freewarepoint.cr.AnimSettings;
 import de.freewarepoint.cr.Player;
 
 import java.awt.*;
@@ -16,6 +17,7 @@ public class UICell implements UIDrawable {
 
 	private final UIAtom[] atoms;
 	private final List<List<UIAtom>> leavingAtoms;
+	private final AnimSettings cfg;
 
 	private int count;
 	
@@ -23,13 +25,14 @@ public class UICell implements UIDrawable {
 	
 	private final int x, y, width, height;
 	
-	public UICell(int x, int y, int width, int height) {
+	public UICell(int x, int y, int width, int height, AnimSettings animCfg) {
 		this.x = x;
 		this.y = y;
 		this.width = width;
 		this.height = height;
 		this.count = 0;
 		this.player = Player.NONE;
+		this.cfg = animCfg;
 		atoms = new UIAtom[ATOMS_PER_CELL];
 		leavingAtoms = new ArrayList<>(ATOMS_PER_CELL);
 		for(int i = 0; i < ATOMS_PER_CELL; i++) {
@@ -122,7 +125,9 @@ public class UICell implements UIDrawable {
 		}
 	}
 
+	
+
 	private void putAtomInternal(int cellIndex, long delay) {
-		atoms[cellIndex] = UIPlayer.getPlayer(player).createAtom(x, y, width, height, cellIndex, delay);
+		atoms[cellIndex] = UIPlayer.getPlayer(player).createAtom(x, y, width, height, cellIndex, delay, cfg);
 	}
 }

@@ -5,6 +5,7 @@ import de.freewarepoint.retrofont.RetroFont;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.AlphaComposite;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -23,7 +24,7 @@ public class UIField extends JPanel implements /*Runnable,*/ FieldListener, Move
 
     static final int CELL_SIZE = 64;
 
-    private static final int DELAY = 40;
+    private static final int DELAY = 25;
     private final javax.swing.Timer timer; // Timer dispara repaint() no EDT
 
     private Game game;
@@ -47,7 +48,6 @@ public class UIField extends JPanel implements /*Runnable,*/ FieldListener, Move
         setDoubleBuffered(true);
         setIgnoreRepaint(true);
 
-        // Configura Timer para animação (substitui busy‑wait)
         timer = new javax.swing.Timer(DELAY, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -57,7 +57,6 @@ public class UIField extends JPanel implements /*Runnable,*/ FieldListener, Move
 
         timer.start();
 
-        // Listener de clique em células.
         addMouseListener(new MouseAdapter() {
             @Override
             public void mouseReleased(MouseEvent e) {
@@ -111,11 +110,31 @@ public class UIField extends JPanel implements /*Runnable,*/ FieldListener, Move
 
         for (int x = 0; x < getField().getWidth(); x++) {
             for (int y = 0; y < getField().getHeight(); y++) {
-                cells[x][y] = new UICell(x, y, getField().getWidth(), getField().getHeight());
+                cells[x][y] = new UICell(x, y, getField().getWidth(), getField().getHeight(), game.getSettings().getAnim());
                 cellBGs[x][y] = new UICellBG(x, y, Player.NONE);
             }
         }
     }
+
+    private void syncFromModel() {
+        Field f = getField();
+        for (int x = 0; x < f.getWidth(); x++) {
+            for (int y = 0; y < f.getHeight(); y++) {
+                CellCoordinateTuple c = new CellCoordinateTuple(x, y);
+                Player owner = f.getOwnerOfCellAtPosition(c);
+                byte atoms   = f.getNumerOfAtomsAtPosition(c);
+
+                if (owner != Player.NONE) {
+                    cells[x][y].setOwner(owner);
+                    cellBGs[x][y].changeOwner(owner);
+                }
+                for (int i = 0; i < atoms; i++) {
+                    cells[x][y].addAtom(0); // delay 0 → sem animação
+                }
+            }
+        }
+    }
+
 
     public final void setGame(Game game) {
         this.game = game;
@@ -126,6 +145,7 @@ public class UIField extends JPanel implements /*Runnable,*/ FieldListener, Move
         getField().addFieldListener(fieldListener);
         game.addMoveListener(this);
         initField();
+        syncFromModel();
     }
 
     Field getField() {
@@ -146,7 +166,8 @@ public class UIField extends JPanel implements /*Runnable,*/ FieldListener, Move
     @Override
     public void onAtomsMoved(final List<Move> moves) {
         for (final Move move : moves) {
-            cells[move.getX1()][move.getY1()].moveTo(cells[move.getX2()][move.getY2()]);
+            cells[move.getX1()][move.getY1()]
+                    .moveTo(cells[move.getX2()][move.getY2()]);
         }
     }
 
@@ -159,7 +180,7 @@ public class UIField extends JPanel implements /*Runnable,*/ FieldListener, Move
     @Override
     public void onCellCleared(CellCoordinateTuple coord) {
         cells[coord.x][coord.y].clear();
-
+        cellBGs[coord.x][coord.y].flash(100);
     }
 
     // draw the grid.

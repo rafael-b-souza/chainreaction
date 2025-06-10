@@ -290,8 +290,8 @@ public class UIGame extends JFrame {
 				FileHandler.save(p, new GameState(game));
 			} catch (IOException ex) {
 				JOptionPane.showMessageDialog(this,
-						"Erro ao salvar:\n" + ex.getMessage(),
-						"Falha", JOptionPane.ERROR_MESSAGE);
+						"Failed to save:\n" + ex.getMessage(),
+						"Error", JOptionPane.ERROR_MESSAGE);
 			}
 		}
 	}
@@ -317,8 +317,8 @@ public class UIGame extends JFrame {
 				updateStatus();
 			} catch (Exception ex) {
 				JOptionPane.showMessageDialog(this,
-						"Não foi possível carregar:\n" + ex.getMessage(),
-						"Erro", JOptionPane.ERROR_MESSAGE);
+						"Unable to load:\n" + ex.getMessage(),
+						"Error", JOptionPane.ERROR_MESSAGE);
 			}
 		}
 	}
@@ -333,7 +333,6 @@ public class UIGame extends JFrame {
 		revalidate();
 		repaint();
 	}
-
 
 
 }

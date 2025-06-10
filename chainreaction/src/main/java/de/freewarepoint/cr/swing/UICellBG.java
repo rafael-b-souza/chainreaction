@@ -19,6 +19,7 @@ public class UICellBG implements UIDrawable {
 	private Player player;
 	private Player oldPlayer;
 	private final int x, y;
+	private long flashUntil = 0;
 
 	public UICellBG(final int x, final int y, final Player player) {
 		this.player = player;
@@ -33,6 +34,10 @@ public class UICellBG implements UIDrawable {
 		oldPlayer = this.player;
 		this.player = player;
 		this.fadeCounter = 0;
+	}
+
+	public void flash(int millis) {
+		flashUntil = System.currentTimeMillis() + millis;
 	}
 
 	@Override
@@ -80,8 +85,16 @@ public class UICellBG implements UIDrawable {
 		float[] hsb = Color.RGBtoHSB(color.getRed(), color.getGreen(), color.getBlue(), new float[3]);
 		hsb[2] += ((animCounter*((float) BRIGHTNESS / ANIM_COUNT))/255);
 		g2d.setColor(new Color(Color.HSBtoRGB(hsb[0], hsb[1], hsb[2])));
-		
 		g2d.fillRect(0, 0, (CELL_SIZE*2), (CELL_SIZE*2));
+
+		if (System.currentTimeMillis() < flashUntil) {
+			Composite old = g2d.getComposite();
+			g2d.setComposite(AlphaComposite.getInstance(
+					AlphaComposite.SRC_ATOP, 0.5f));   // 35 % alfa
+			g2d.setColor(Color.WHITE);
+			g2d.fillRect(0, 0, UIField.CELL_SIZE * 2, UIField.CELL_SIZE * 2);
+			g2d.setComposite(old);
+		}
 		
 		g2d.setColor(oldColor);
 		g2d.setTransform(transform);

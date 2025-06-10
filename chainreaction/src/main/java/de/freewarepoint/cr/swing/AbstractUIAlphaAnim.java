@@ -9,7 +9,7 @@ public abstract class AbstractUIAlphaAnim implements UIAnimation {
 	private static final int DELAY = 40;
 	private final UIAnimation anim;
 	private long lastAnim;
-	final static int MAX_COUNTER = 20;
+	final static int MAX_COUNTER = 10;
 	
 	AbstractUIAlphaAnim(UIAnimation anim, long delay) {
 		this.anim = anim;
@@ -27,7 +27,7 @@ public abstract class AbstractUIAlphaAnim implements UIAnimation {
 		}
 		int	currCounter = nextCounter(countOfAnims);
 
-		final AlphaComposite ac = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, ((float)currCounter)/MAX_COUNTER);
+		final AlphaComposite ac = AlphaComposite.getInstance(AlphaComposite.SRC_ATOP, ((float)currCounter)/MAX_COUNTER);
 		Composite oldComposite = g2d.getComposite();
 		g2d.setComposite(ac);
 		anim.draw(g2d);

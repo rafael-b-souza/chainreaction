@@ -3,7 +3,6 @@ package de.freewarepoint.cr.swing;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
-
 import de.freewarepoint.cr.Game;
 import de.freewarepoint.cr.Player;
 import de.freewarepoint.retrofont.RetroFont;
@@ -100,6 +99,11 @@ public class UISettings extends JPanel implements Runnable {
 					}
 				}));
 
+		buttonPanel.add(createTextButton(
+				"Import anim", Color.WHITE,
+				e -> importAnimSettings()));
+
+
 		add(buttonPanel, BorderLayout.CENTER);
 	}
 
@@ -147,4 +151,31 @@ public class UISettings extends JPanel implements Runnable {
 				retroFont.getRetroString(
 						str, Color.BLACK, UIPlayer.getPlayer(player).getForeground(), 16)));
 	}
+
+	private void importAnimSettings() {
+		JFileChooser fc = new JFileChooser();
+		fc.setDialogTitle("Import animation");
+		fc.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter(
+				"Config .properties", "properties"));
+
+		if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+			try {
+				java.nio.file.Path p = fc.getSelectedFile().toPath();
+				de.freewarepoint.cr.AnimSettings a =
+						de.freewarepoint.cr.io.AnimPropertiesLoader.load(p);
+
+				game.getSettings().setAnim(a);
+				de.freewarepoint.cr.SettingsLoader
+						.storeSettings(game.getSettings());
+				uiGame.startNewGame();
+				javax.swing.JOptionPane.showMessageDialog(this,
+						"Animation settings imported!");
+			} catch (Exception ex) {
+				javax.swing.JOptionPane.showMessageDialog(this,
+						"Failure: " + ex.getMessage(),
+						"Error", javax.swing.JOptionPane.ERROR_MESSAGE);
+			}
+		}
+	}
+
 }

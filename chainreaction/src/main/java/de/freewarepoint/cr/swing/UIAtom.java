@@ -4,14 +4,16 @@ import java.awt.*;
 import java.io.IOException;
 import java.util.Properties;
 
+import de.freewarepoint.cr.AnimSettings;
 import de.freewarepoint.cr.Player;
 
 public class UIAtom implements UIAnimation {
-	
+
+	private final AnimSettings cfg;
 	private UIAnimation anim;
 	private final int x, y, width, height, pos; 
 
-	public UIAtom(final String propertyFile, int x, int y, int width, int height, int pos, long delay, Player player) {
+	public UIAtom(final String propertyFile, int x, int y, int width, int height, int pos, long delay, Player player, AnimSettings cfg) {
 		this.x = x;
 		this.y = y;
 		this.width = width;
@@ -28,6 +30,7 @@ public class UIAtom implements UIAnimation {
 		final int count = Integer.parseInt(props.getProperty("idle.count"));
 		final String bgFN = props.getProperty("bg." + player.ordinal());
 		anim = new UIEnterAnim(new UIImgAnim(animFN, count, bgFN), delay);
+		this.cfg = cfg;
 	}
 	
 	@Override
@@ -40,7 +43,7 @@ public class UIAtom implements UIAnimation {
 	}
 	
 	public void explode() {
-		anim = new UIExplodeAnim(new UILeaveAnim(anim, 250), x, y, width, height, pos) ;
+		anim = new UIExplodeAnim(new UILeaveAnim(anim, 250), x, y, width, height, pos,cfg) ;
 	}
 
 

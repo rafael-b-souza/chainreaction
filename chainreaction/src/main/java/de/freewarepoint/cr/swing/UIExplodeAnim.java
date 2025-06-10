@@ -1,6 +1,8 @@
 package de.freewarepoint.cr.swing;
 
-import java.awt.Graphics2D;
+import de.freewarepoint.cr.AnimSettings;
+
+import java.awt.*;
 import java.awt.geom.AffineTransform;
 import static de.freewarepoint.cr.swing.UIField.CELL_SIZE;
 
@@ -29,17 +31,24 @@ public class UIExplodeAnim implements UIAnimation {
 		}
 	}
 	private static final int DELAY = 40;
+
 	private static final double VELOCITY_START = 15f;
 	private static final double ACCELERATION = -Math.pow((VELOCITY_START),2)/(2*2*CELL_SIZE);
-	
+	private static final int BASE_SIZE = UIField.CELL_SIZE * 2; // 128px
+
 	private long lastAnim = System.currentTimeMillis();
 	private double dist = 0f;
 	private long animCounter = 0;
 	private final UIAnimation anim;
 	private final Direction direction;
+	private final int    totalFrames;     // -> pegar do Settings
+	private final boolean shrinkEnd;
 	
-	public UIExplodeAnim(final UIAnimation anim, final int x, final int y, final int width, final int height, final int pos) {
+	public UIExplodeAnim(final UIAnimation anim, final int x, final int y, final int width, final int height, final int pos, AnimSettings cfg) {
 		this.anim = anim;
+		this.totalFrames = cfg.getExplodeFrames();
+		this.shrinkEnd   = cfg.isShrinkEnd();
+
 		// top left
 		if(x == 0 && y == 0) {
 			switch(pos) {
@@ -164,21 +173,24 @@ public class UIExplodeAnim implements UIAnimation {
 			animCounter += countOfAnims;
 		}
 		double oldDist = dist;
-		double t = animCounter / 25.0;           // normaliza 0-1
+		double t = animCounter / (double) totalFrames;
+		if (t > 1) t = 1;
+
+//		double s = 3 * t * t - 2 * t * t * t;
+//		dist = s * 2 * CELL_SIZE;
+
 		double easeOut = 1 - Math.pow(1-t, 3);   // cubic-out
 		dist = easeOut * 2 * CELL_SIZE;
 
 		if(dist < oldDist) {
 			dist = oldDist;
 		}
-		
+
 		final AffineTransform transform = g2d.getTransform();
 		g2d.translate((dist*direction.getTranslateX()), dist*direction.getTranslateY());
 		anim.draw(g2d);
 		g2d.setTransform(transform);
 	}
-
-
 
 	@Override
 	public boolean isFinished() {

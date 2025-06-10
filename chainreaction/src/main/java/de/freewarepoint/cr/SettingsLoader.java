@@ -26,6 +26,9 @@ import de.freewarepoint.cr.exceptions.ConfigUnreadableException;
 public class SettingsLoader {
 
 	private static final String REACTION_DELAY = "reaction.delay";
+	private static final String ANIM_MODE          = "anim.mode";
+	private static final String ANIM_FRAMES        = "anim.explodeFrames";
+	private static final String ANIM_SHRINK_END    = "anim.shrinkEnd";
 
 	/**
 	 * Loads the settings stored in the user's home directory.
@@ -45,7 +48,19 @@ public class SettingsLoader {
 			BufferedInputStream stream = new BufferedInputStream(new FileInputStream(configFileName));
 			properties.load(stream);
 			int delay = Integer.valueOf(properties.getProperty(REACTION_DELAY));
-			return new Settings(delay);
+
+			Settings s = new Settings(delay);
+			AnimSettings a = new AnimSettings();
+			a.setMode(AnimSettings.Mode.valueOf(
+					properties.getProperty(ANIM_MODE, a.getMode().name())));
+			a.setExplodeFrames(Integer.parseInt(
+					properties.getProperty(ANIM_FRAMES,
+							String.valueOf(a.getExplodeFrames()))));
+			a.setShrinkEnd(Boolean.parseBoolean(
+					properties.getProperty(ANIM_SHRINK_END,
+							String.valueOf(a.isShrinkEnd()))));
+			s.setAnim(a);
+			return s;
 		} catch (ConfigUnreadableException e) {
 			Settings settingsWithDefaultValues = new Settings();
 			storeSettings(settingsWithDefaultValues);
@@ -56,10 +71,14 @@ public class SettingsLoader {
 		}
 	}
 
-	private static void storeSettings(Settings settings) {
+	public static void storeSettings(Settings settings) {
 		String configFileName = getConfigurationFileLocation().toString();
 		Properties properties = new Properties();
 		properties.setProperty(REACTION_DELAY, String.valueOf(settings.getReactionDelay()));
+		AnimSettings a = settings.getAnim();
+		properties.setProperty(ANIM_MODE,       a.getMode().name());
+		properties.setProperty(ANIM_FRAMES,     String.valueOf(a.getExplodeFrames()));
+		properties.setProperty(ANIM_SHRINK_END, String.valueOf(a.isShrinkEnd()));
 		try {
 			BufferedOutputStream stream = new BufferedOutputStream(new FileOutputStream(configFileName));
 			properties.store(stream, "Settings for Chain Reaction");

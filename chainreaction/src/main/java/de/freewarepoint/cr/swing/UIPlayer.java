@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.util.EnumMap;
 import java.util.Map;
 
+import de.freewarepoint.cr.AnimSettings;
 import de.freewarepoint.cr.Player;
 
 public class UIPlayer {
@@ -39,11 +40,11 @@ public class UIPlayer {
 		this.player = player;
 	}
 
-	public UIAtom createAtom(int x, int y, int width, int height, int pos, long delay) {
+	public UIAtom createAtom(int x, int y, int width, int height, int pos, long delay, AnimSettings cfg) {
 		switch(player) {
 			case FIRST:
 			case SECOND:
-				return new UIAtom("/atom/atom.properties", x, y, width, height, pos, delay, player);
+				return new UIAtom("/atom/atom.properties", x, y, width, height, pos, delay, player, cfg);
 			case NONE:
 				throw new UnsupportedOperationException("You cannot create an atom for no player");
 			default:

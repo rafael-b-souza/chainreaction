@@ -73,7 +73,7 @@ public class Game {
 		// no further moves if we have a winner
 		if (getWinner() != Player.NONE) {
 			LOG.warning(String.format(
-					"Jogada inválida de %s (vencedor %s) em (%d,%d)",
+					"Invalid move by %s (winner %s) at (%d,%d)",
 					player, getWinner(), coord.x, coord.y));
 			return false;          // ou true, se optar pela lógica inversa
 		}
@@ -84,7 +84,7 @@ public class Game {
 		// or belong to the current player
 		if (owner != Player.NONE && owner != player) {
 			LOG.fine(String.format(
-					"Jogada inválida de %s em célula do oponente (%d,%d)",
+					"Invalid move by %s on opponent cell (%d,%d)",
 					player, coord.x, coord.y));
 			return false;
 		}
