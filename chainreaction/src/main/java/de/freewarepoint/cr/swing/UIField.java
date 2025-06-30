@@ -180,7 +180,7 @@ public class UIField extends JPanel implements /*Runnable,*/ FieldListener, Move
     @Override
     public void onCellCleared(CellCoordinateTuple coord) {
         cells[coord.x][coord.y].clear();
-        cellBGs[coord.x][coord.y].flash(100);
+        cellBGs[coord.x][coord.y].flash(200);
     }
 
     // draw the grid.
