@@ -18,7 +18,7 @@ public class UISettings extends JPanel implements Runnable {
 	private final JButton chooseAI2Button;
 	private final RetroFont retroFont = new RetroFont();
 
-	/* ---------------- construtor ---------------- */
+	
 	public UISettings(final UIGame uiGame) {
 		super();
 		this.uiGame = uiGame;
@@ -27,7 +27,7 @@ public class UISettings extends JPanel implements Runnable {
 		setDoubleBuffered(true);
 		setLayout(new BorderLayout(16, 16));
 
-		/* --- LOGO ---------------------------------------------------------------- */
+		// Logo
 		JPanel logoPanel = new JPanel(new BorderLayout());
 		logoPanel.setBackground(Color.BLACK);
 		logoPanel.add(new JLabel(
@@ -35,12 +35,12 @@ public class UISettings extends JPanel implements Runnable {
 						retroFont.getRetroString("ChainReaction", Color.WHITE, 32))));
 		add(logoPanel, BorderLayout.WEST);
 
-		/* --- BOTÕES -------------------------------------------------------------- */
+		// Botoes
 		JPanel buttonPanel = new JPanel(
 				new GridLayout(3, 2, 16, 16));          // 3 linhas × 2 colunas
 		buttonPanel.setBackground(Color.BLACK);
 
-		/* Player 1 --------------------------------------------------------------- */
+		// Player 1
 		chooseAI1Button = createTextButton(
 				"Player 1 (Human)",
 				UIPlayer.getPlayer(Player.FIRST).getForeground(),
@@ -107,10 +107,10 @@ public class UISettings extends JPanel implements Runnable {
 		add(buttonPanel, BorderLayout.CENTER);
 	}
 
-	/* ---------------- setter chamado pelo UIGame ---------------- */
+	// Setter chamado pelo UIGame
 	public void setGame(Game game) { this.game = game; }
 
-	/* ---------------- Runnable p/ SwingUtilities.invokeLater ----- */
+	// Runnable para SwingUtilities.invokeLater
 	@Override
 	public void run() {
 		if (game != null) {
@@ -119,7 +119,7 @@ public class UISettings extends JPanel implements Runnable {
 		}
 	}
 
-	/* ---------------- helpers privados --------------------------- */
+	// Helpers privados
 	private JButton createTextButton(
 			String label, Color fg, ActionListener al) {
 

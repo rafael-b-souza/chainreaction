@@ -1,5 +1,8 @@
-*target/
-*.settings/
+*.class
 *.project
 *.iml
 *.classpath
+.idea/
+target/
+bin/
+*.crsave
